@@ -1,0 +1,12 @@
+[Unit]
+Description=Energy Monitor
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/admin/energymeter/service.sh
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=default.target
