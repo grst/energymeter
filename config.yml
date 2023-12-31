@@ -1,0 +1,9 @@
+meters:
+  Gottfried_Lieferung:
+    GPIO: 21
+    Imp: 10000
+  Gregor:
+    GPIO: 13
+    Imp: 1000
+
+
