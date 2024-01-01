@@ -8,8 +8,10 @@ from threading import Event
 from sqlalchemy import create_engine, Column, DateTime, String
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 import sys
+from queue import Queue
 
 Base = declarative_base()
 
@@ -33,14 +35,16 @@ if __name__ == "__main__":
     Session = sessionmaker(bind=engine)
     session = Session()
 
+    pulse_queue = Queue()
+
     GPIO.setmode(GPIO.BCM)
 
     def pulse_callback(_, *, meter_id=None):
         # Example: Add a new Pulse to the database
-        new_pulse = Pulse(meter_id=meter_id, time=datetime.utcnow())
-        session.add(new_pulse)
-        session.commit()
         print(f"{meter_id}\t{datetime.utcnow().isoformat()}")
+        new_pulse = Pulse(meter_id=meter_id, time=datetime.utcnow())
+        pulse_queue.put(new_pulse)
+
 
     for meter_id, params in CONFIG["meters"].items():
         sys.stderr.write(f"Setting up meter '{meter_id}' on GPIO {params['GPIO']}\n")
@@ -51,6 +55,10 @@ if __name__ == "__main__":
             callback=partial(pulse_callback, meter_id=meter_id),
         )
 
-    # Wait indefinitely
-    event = Event()
-    event.wait()
+    while True:
+        new_pulse = pulse_queue.get()
+        try:
+            session.add(new_pulse)
+            session.commit()
+        except SQLAlchemyError as e:
+            sys.stderr.write(f"Exception when writing to database: {e}")
