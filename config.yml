@@ -1,10 +1,10 @@
 meters:
   Gottfried_Lieferung:
     GPIO: 21
-    Imp: 10000
+    Imp: 1000
   Gottfried_Bezug:
     GPIO: 20
-    Imp: 10000
+    Imp: 1000
   Gregor:
     GPIO: 13
     Imp: 1000
