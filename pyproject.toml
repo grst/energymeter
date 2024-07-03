@@ -19,6 +19,7 @@ dependencies = [
     "sqlalchemy",
     "pyyaml",
     "pymodbus<3",
+    "RPi.GPIO"
 ]
 
 [project.optional-dependencies]

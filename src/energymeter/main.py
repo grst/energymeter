@@ -9,13 +9,12 @@ from threading import Thread
 from time import sleep
 
 import yaml
-from modbus import Modbus, Register
 from RPi import GPIO
 from sqlalchemy.exc import SQLAlchemyError
 
+from ._util import _connect_to_modbus
 from .db import CumulativePower, Power, Pulse, get_session
-
-MODBUS_UNIT = 3
+from .modbus import Modbus, Register
 
 
 def _pulse_callback(_, *, queue: Queue, meter_id: str):
@@ -58,17 +57,6 @@ def events_to_database(queue: Queue, db_session):
             db_session.commit()
         except SQLAlchemyError as e:
             sys.stderr.write(f"Exception when writing to database: {e}")
-
-
-def _connect_to_modbus(configs: dict):
-    """Go through all configs and make create one modbus connection for each unique IP"""
-    modbus_connections = {}
-    for params in configs.values():
-        if "modbus" in params:
-            ip = params["ip"]
-            if ip not in modbus_connections:
-                modbus_connections[ip] = Modbus(ip)
-    return modbus_connections
 
 
 def main():

@@ -53,6 +53,24 @@ meters:
     modbus: 30583
     modbus_type: U32
     ip: 192.168.193.156
+  Sunny_Island_Ladezustand:
+    description: "Ladezustand des Akkus (%)"
+    type: null # don't save to db
+    modbus: 30845
+    modbus_type: U32
+    ip: 192.168.193.156
+  Sunny_Island_Netzbezug_Leistung:
+    description: "Netzbezug momentan (W)"
+    type: null # don't save to db
+    modbus: 30865
+    modbus_type: S32
+    ip: 192.168.193.156
+  Sunny_Island_Einspeisung_Leistung:
+    description: "Einspeisung momentan (W)"
+    type: null # don't save to db
+    modbus: 30867
+    modbus_type: S32
+    ip: 192.168.193.156
 db_con: "sqlite:///./data/pulse.sqlite"
 # interval for polling modbus interfaces in seconds
 interval: 5
