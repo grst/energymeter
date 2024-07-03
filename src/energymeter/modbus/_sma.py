@@ -1,3 +1,5 @@
+"""Not used by this project, but nice reference of the registers and their data types"""
+
 from modbus import Modbus
 from Register import S16, S32, STR32, U16, U32, U64
 

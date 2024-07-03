@@ -21,7 +21,7 @@ class Power(Base):
     __tablename__ = "power"
     meter_id = Column(String(20), nullable=False, index=True, primary_key=True)
     time = Column(DateTime, nullable=False, default=datetime.now(datetime.UTC), index=True, primary_key=True)
-    power = Column(Integer, nullable=False)
+    value = Column(Integer, nullable=False)
 
 
 class CumulativePower(Base):
@@ -30,11 +30,11 @@ class CumulativePower(Base):
     __tablename__ = "cumulative_power"
     meter_id = Column(String(20), nullable=False, index=True, primary_key=True)
     time = Column(DateTime, nullable=False, default=datetime.now(datetime.UTC), index=True, primary_key=True)
-    counter_value = Column(Integer, nullable=False)
+    value = Column(Integer, nullable=False)
 
 
 def get_session(con):
     engine = create_engine(con)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
-    session = Session()
+    return Session()

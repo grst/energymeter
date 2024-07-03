@@ -26,6 +26,10 @@ dev = [
     "pre-commit",
 ]
 
+[project.scripts]
+energymeter = "energymeter.main:main"
+pvtop = "energymeter.pvtop:main"
+
 [tool.hatch.build.targets.wheel]
 packages = ['src/energymeter']
 

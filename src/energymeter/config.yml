@@ -6,6 +6,7 @@
 # GPIO: GPIO port for Pulse
 # Imp: Number of pulses per kWh for Pulse
 # modbus: modbus register for Power/Cumulative Power
+# modbus_type: data type of the modbus register, e.g. U64 (unsigned 64-bit),  S32 (signed 32 bit), ...
 # ip: IP address for modbus
 meters:
   Gottfried_Lieferung:
@@ -32,20 +33,26 @@ meters:
     description: "Gesamtertrag Wechselrichter (Wh)"
     type: CumulativePower
     modbus: 30513
+    modbus_type: U64
     ip: 192.168.193.147
   Sunny_Island_Batterieleistung:
     description: "Leistung Speichersystem, negativ wenn laden (Wh)"
     type: Power
     modbus: 30775
+    modbus_type: S32
     ip: 192.168.193.156
   Sunny_Island_Netzbezug:
     description: "Netzbezug gesamt (Wh)"
     type: CumulativePower
     modbus: 30581
+    modbus_type: U32
+    ip: 192.168.193.156
   Sunny_Island_Einspeisung:
     description: "Netzeinspeisung gesamt (Wh)"
     type: CumulativePower
     modbus: 30583
+    modbus_type: U32
+    ip: 192.168.193.156
 db_con: "sqlite:///./data/pulse.sqlite"
 # interval for polling modbus interfaces in seconds
 interval: 5
