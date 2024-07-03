@@ -1,0 +1,53 @@
+# Meter definition
+# type: 
+#  - Pulse (S0, count pulses per unit of energy)
+#  - Power (read out current power in W),
+#  - CumulativePower (read out increasing counter in Wh)
+# GPIO: GPIO port for Pulse
+# Imp: Number of pulses per kWh for Pulse
+# modbus: modbus register for Power/Cumulative Power
+# ip: IP address for modbus
+meters:
+  Gottfried_Lieferung:
+    type: Pulse
+    GPIO: 21
+    Imp: 1000
+  Gottfried_Bezug:
+    type: Pulse
+    GPIO: 20
+    Imp: 1000
+  Gregor:
+    type: Pulse
+    GPIO: 13
+    Imp: 1000
+  Marianna:
+    type: Pulse
+    GPIO: 5
+    Imp: 1000
+  Uli: 
+    type: Pulse
+    GPIO: 7
+    Imp: 1000
+  Sunny_Tripower_Gesamtertrag:
+    description: "Gesamtertrag Wechselrichter (Wh)"
+    type: CumulativePower
+    modbus: 30513
+    ip: 192.168.193.147
+  Sunny_Island_Batterieleistung:
+    description: "Leistung Speichersystem, negativ wenn laden (Wh)"
+    type: Power
+    modbus: 30775
+    ip: 192.168.193.156
+  Sunny_Island_Netzbezug:
+    description: "Netzbezug gesamt (Wh)"
+    type: CumulativePower
+    modbus: 30581
+  Sunny_Island_Einspeisung:
+    description: "Netzeinspeisung gesamt (Wh)"
+    type: CumulativePower
+    modbus: 30583
+db_con: "sqlite:///./data/pulse.sqlite"
+# interval for polling modbus interfaces in seconds
+interval: 5
+
+
