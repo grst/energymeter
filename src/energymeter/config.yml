@@ -1,5 +1,5 @@
 # Meter definition
-# type:
+# db_table: # the database table (=Sqlalchemy type) into which this metric shall be written
 #  - Pulse (S0, count pulses per unit of energy)
 #  - Power (read out current power in W),
 #  - CumulativePower (read out increasing counter in Wh)
@@ -10,64 +10,64 @@
 # ip: IP address for modbus
 meters:
   Gottfried_Lieferung:
-    type: Pulse
+    db_table: Pulse
     GPIO: 21
     Imp: 1000
   Gottfried_Bezug:
-    type: Pulse
+    db_table: Pulse
     GPIO: 20
     Imp: 1000
   Gregor:
-    type: Pulse
+    db_table: Pulse
     GPIO: 13
     Imp: 1000
   Marianna:
-    type: Pulse
+    db_table: Pulse
     GPIO: 5
     Imp: 1000
   Uli:
-    type: Pulse
+    db_table: Pulse
     GPIO: 7
     Imp: 1000
   Sunny_Tripower_Gesamtertrag:
     description: "Gesamtertrag Wechselrichter (Wh)"
-    type: CumulativePower
+    db_table: CumulativePower
     modbus: 30513
     modbus_type: U64
     ip: 192.168.193.147
   Sunny_Island_Batterieleistung:
     description: "Leistung Speichersystem, negativ wenn laden (Wh)"
-    type: Power
+    db_table: Power
     modbus: 30775
     modbus_type: S32
     ip: 192.168.193.156
   Sunny_Island_Netzbezug:
     description: "Netzbezug gesamt (Wh)"
-    type: CumulativePower
+    db_table: CumulativePower
     modbus: 30581
     modbus_type: U32
     ip: 192.168.193.156
   Sunny_Island_Einspeisung:
     description: "Netzeinspeisung gesamt (Wh)"
-    type: CumulativePower
+    db_table: CumulativePower
     modbus: 30583
     modbus_type: U32
     ip: 192.168.193.156
   Sunny_Island_Ladezustand:
     description: "Ladezustand des Akkus (%)"
-    type: null # don't save to db
+    db_table: null # don't save to db
     modbus: 30845
     modbus_type: U32
     ip: 192.168.193.156
   Sunny_Island_Netzbezug_Leistung:
     description: "Netzbezug momentan (W)"
-    type: null # don't save to db
+    db_table: null # don't save to db
     modbus: 30865
     modbus_type: S32
     ip: 192.168.193.156
   Sunny_Island_Einspeisung_Leistung:
     description: "Einspeisung momentan (W)"
-    type: null # don't save to db
+    db_table: null # don't save to db
     modbus: 30867
     modbus_type: S32
     ip: 192.168.193.156
