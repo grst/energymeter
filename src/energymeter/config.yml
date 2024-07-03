@@ -1,5 +1,5 @@
 # Meter definition
-# type: 
+# type:
 #  - Pulse (S0, count pulses per unit of energy)
 #  - Power (read out current power in W),
 #  - CumulativePower (read out increasing counter in Wh)
@@ -24,7 +24,7 @@ meters:
     type: Pulse
     GPIO: 5
     Imp: 1000
-  Uli: 
+  Uli:
     type: Pulse
     GPIO: 7
     Imp: 1000
@@ -49,5 +49,3 @@ meters:
 db_con: "sqlite:///./data/pulse.sqlite"
 # interval for polling modbus interfaces in seconds
 interval: 5
-
-

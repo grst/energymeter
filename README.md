@@ -23,17 +23,18 @@ The output database can also be set in the config file.
 
 ## Dependencies
 
-* `pip install pyyaml sqlalchemy`
-* Python >= 3.9
+-   `pip install pyyaml sqlalchemy`
+-   Python >= 3.9
 
 ## How it works
 
- * `monitor.py` is a simple python script that waits for events being detected on any of the GPIO ports. On every event,
-   an entry is written to the database.
- * `service.sh` is a wrapper script called by the systemd service
- * `energymonitor.service` is a systemd service file, that needs to be put into `/etc/systemd/system`.
+-   `monitor.py` is a simple python script that waits for events being detected on any of the GPIO ports. On every event,
+    an entry is written to the database.
+-   `service.sh` is a wrapper script called by the systemd service
+-   `energymonitor.service` is a systemd service file, that needs to be put into `/etc/systemd/system`.
 
 To activate the service call
+
 ```
 systemctl enable energymonitor.service
 systemctl start energymonitor.service
