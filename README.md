@@ -12,8 +12,8 @@ but also _when_. Like that we can learn more about our energy consumption, optim
 self-generated energy, and split the cost more accurately.
 
 Luckily, the Eltako meters can be read out via a S0-interface. This is a very simple interface that sends one electric pulse for each consumed Wh. 
-Moreover, the SMA inverter and battery system can be queried using a Modbus interface via the local network. This project contains a Python
-project I run on a Rasperry Pi zero to count the pulses received via S0 and to query the modbus interface in a fixed interval. The resulting
+Moreover, the SMA inverter and battery system can be queried using a Modbus interface via the local network such that we can retreive information about energy production and storage. This repo contains a Python
+package I run on a Rasperry Pi zero to count the pulses received via S0 and to query the modbus interface in a fixed interval. The resulting
 measurements are saved in a SQLite database that can be used for analyzing and visualzing the energy consumption and production. 
 
 ## Hardware setup
@@ -66,24 +66,61 @@ meters:
       ip_address: 192.168.1.147
 ```
 
-## How it works
-
--   `monitor.py` is a simple python script that waits for events being detected on any of the GPIO ports. On every event,
-    an entry is written to the database.
--   `service.sh` is a wrapper script called by the systemd service
--   `energymonitor.service` is a systemd service file, that needs to be put into `/etc/systemd/system`.
-
-To activate the service call
-
+Additionaly, the configuration defines the path to the sqlite database and the interval for polling the modbus interface
+```yaml
+db_con: "sqlite:///./data/pulse.sqlite"
+# interval for polling modbus interfaces in seconds
+interval: 5
 ```
+
+## Usage
+
+The package provides a `energymeter` binary that can be executed from the command line and immediately starts monitoring and recording the data, e.g.
+
+```bash
+> energymeter
+Setting up meter 'Sunny_Island_Batterieleistung' with ID 105 for register 30775 on 192.168.193.156
+Setting up meter 'Sunny_Tripower_Gesamtertrag' with ID 106 for register 30513 on 192.168.193.147
+Setting up meter 'Sunny_Island_Netzbezug' with ID 107 for register 30581 on 192.168.193.156
+Setting up meter 'Sunny_Island_Einspeisung' with ID 108 for register 30583 on 192.168.193.156
+Sunny_Tripower_Gesamtertrag	106	2024-07-04T18:51:24.655898+00:00	4973419
+Sunny_Island_Batterieleistung	105	2024-07-04T18:51:24.664780+00:00	1652
+Sunny_Island_Netzbezug	107	2024-07-04T18:51:24.694910+00:00	59830
+Sunny_Island_Einspeisung	108	2024-07-04T18:51:24.725720+00:00	1969330
+```
+
+For serious monitoring, it's better to create a systemd service that will be automatically restarted should the program fail, or the Rasperry Pi reboot, e.g. due to a power outage. 
+An example file is provided in `energymonitor.service`, but you might need to adapt it. The file needs to be copied to `/etc/systemd/system`, then activate the service wite
+
+```bash
 systemctl enable energymonitor.service
 systemctl start energymonitor.service
 ```
 
-It will be started automatically after a reboot.
-
 Check the status with
 
-```
+```bash
 systemctl status energymonitor.service
+```
+
+## pvtop - monitor the PV system from the terminal in real time
+
+Additionally, there's the `pvtop` binary, which reads out only the modbus interfaces and prints the results to the terminal, e.g.
+
+```bash
+> pvtop
+Description	Value
+State of Charge (%)	98
+Current PV Power (W)	135
+Grid supply (W)	0
+Grid Feed-in (W)	22
+Power output of storage system (negative, when charging) (Wh)	600
+Total yield inverter (Wh)	4973429
+Total grid supply (Wh)	59840
+Total grid feed-in (Wh)	1969340
+```
+
+Combine this with unix tools to update it every 2 seconds and format it more nicely:
+```bash
+watch "pvtop | column -t -s $'\t'"
 ```
