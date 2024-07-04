@@ -1,76 +1,90 @@
-# Meter definition
-# db_table: # the database table (=Sqlalchemy type) into which this metric shall be written
-#  - Pulse (S0, count pulses per unit of energy)
-#  - Power (read out current power in W),
-#  - CumulativePower (read out increasing counter in Wh)
-# GPIO: GPIO port for Pulse
-# Imp: Number of pulses per kWh for Pulse
-# modbus: modbus register for Power/Cumulative Power
-# modbus_type: data type of the modbus register, e.g. U64 (unsigned 64-bit),  S32 (signed 32 bit), ...
-# ip: IP address for modbus
+# meter definitions
+# For description of the available and required fields for each meter, check `meters.py`.
 meters:
-  Gottfried_Lieferung:
-    db_table: Pulse
-    GPIO: 21
-    Imp: 1000
-  Gottfried_Bezug:
-    db_table: Pulse
-    GPIO: 20
-    Imp: 1000
-  Gregor:
-    db_table: Pulse
-    GPIO: 13
-    Imp: 1000
-  Marianna:
-    db_table: Pulse
-    GPIO: 5
-    Imp: 1000
-  Uli:
-    db_table: Pulse
-    GPIO: 7
-    Imp: 1000
-  Sunny_Tripower_Gesamtertrag:
-    description: "Gesamtertrag Wechselrichter (Wh)"
-    db_table: CumulativePower
-    modbus: 30513
-    modbus_type: U64
-    ip: 192.168.193.147
-  Sunny_Island_Batterieleistung:
-    description: "Leistung Speichersystem, negativ wenn laden (Wh)"
-    db_table: Power
-    modbus: 30775
-    modbus_type: S32
-    ip: 192.168.193.156
-  Sunny_Island_Netzbezug:
-    description: "Netzbezug gesamt (Wh)"
-    db_table: CumulativePower
-    modbus: 30581
-    modbus_type: U32
-    ip: 192.168.193.156
-  Sunny_Island_Einspeisung:
-    description: "Netzeinspeisung gesamt (Wh)"
-    db_table: CumulativePower
-    modbus: 30583
-    modbus_type: U32
-    ip: 192.168.193.156
-  Sunny_Island_Ladezustand:
-    description: "Ladezustand des Akkus (%)"
-    db_table: null # don't save to db
-    modbus: 30845
-    modbus_type: U32
-    ip: 192.168.193.156
-  Sunny_Island_Netzbezug_Leistung:
-    description: "Netzbezug momentan (W)"
-    db_table: null # don't save to db
-    modbus: 30865
-    modbus_type: S32
-    ip: 192.168.193.156
-  Sunny_Island_Einspeisung_Leistung:
-    description: "Einspeisung momentan (W)"
-    db_table: null # don't save to db
-    modbus: 30867
-    modbus_type: S32
-    ip: 192.168.193.156
+  GPIO:
+    Gottfried_Lieferung:
+      id: 1
+      db_table: Pulse
+      gpio_port: 21
+      imp_per_kwh: 1000
+    Gottfried_Bezug:
+      id: 2
+      db_table: Pulse
+      gpio_port: 20
+      imp_per_kwh: 1000
+    Gregor:
+      id: 3
+      db_table: Pulse
+      gpio_port: 13
+      imp_per_kwh: 1000
+    Marianna:
+      id: 4
+      db_table: Pulse
+      gpio_port: 5
+      imp_per_kwh: 1000
+    Uli:
+      id: 5
+      db_table: Pulse
+      gpio_port: 7
+      imp_per_kwh: 1000
+  Modbus:
+    Sunny_Island_Ladezustand:
+      id: 101
+      description: "Ladezustand des Akkus (%)"
+      db_table: null # don't save to db
+      modbus_register_address: 30845
+      modbus_register_type: U32
+      ip_address: 192.168.193.156
+    Sunny_Tripower_Leistung:
+      id: 102
+      description: "Momentane PV Leistung (W)"
+      db_table: null # don't save to db
+      modbus_register_address: 30775
+      modbus_register_type: U32
+      ip_address: 192.168.193.147
+    Sunny_Island_Netzbezug_Leistung:
+      id: 103
+      description: "Netzbezug momentan (W)"
+      db_table: null # don't save to db
+      modbus_register_address: 30865
+      modbus_register_type: S32
+      ip_address: 192.168.193.156
+    Sunny_Island_Einspeisung_Leistung:
+      id: 104
+      description: "Einspeisung momentan (W)"
+      db_table: null # don't save to db
+      modbus_register_address: 30867
+      modbus_register_type: S32
+      ip_address: 192.168.193.156
+    Sunny_Island_Batterieleistung:
+      id: 105
+      description: "Leistung Speichersystem, negativ wenn laden (Wh)"
+      db_table: Power
+      modbus_register_address: 30775
+      modbus_register_type: S32
+      ip_address: 192.168.193.156
+    Sunny_Tripower_Gesamtertrag:
+      id: 106
+      description: "Gesamtertrag Wechselrichter (Wh)"
+      db_table: CumulativePower
+      modbus_register_address: 30513
+      modbus_register_type: U64
+      ip_address: 192.168.193.147
+    Sunny_Island_Netzbezug:
+      id: 107
+      description: "Netzbezug gesamt (Wh)"
+      db_table: CumulativePower
+      modbus_register_address: 30581
+      modbus_register_type: U32
+      ip_address: 192.168.193.156
+    Sunny_Island_Einspeisung:
+      id: 108
+      description: "Netzeinspeisung gesamt (Wh)"
+      db_table: CumulativePower
+      modbus_register_address: 30583
+      modbus_register_type: U32
+      ip_address: 192.168.193.156
+
 db_con: "sqlite:///./data/pulse.sqlite"
 # interval for polling modbus interfaces in seconds
 interval: 5
