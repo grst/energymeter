@@ -1,7 +1,7 @@
 # Monitoring energymeters and SMA devices using a Rasperry Pi Zero
 
 I live in a house with four flats, each of which is owned by a different member of my family.
-In 2024 we jointly invested in a 23kWp photovoltaics (PV) system with 22kWh battery storage. To optimally use the energy
+In 2024 we jointly invested in a 23kWp photovoltaics (PV) system with 22kWh battery storage. To optimally share the energy
 across the entire house, we now only have one contract (and one electricity meter) with the grid operator. Behind
 the main meter, the consumption of each flat is measured using an Eltako electricity meter (as shown below) which we
 use to split the electricity cost.
@@ -24,7 +24,7 @@ measurements are saved in a SQLite database that can be used for analyzing and v
 
 The S0 interface of the Eltako energy meters is connected to the GPIO ports of a Rasperry Pi zero. 
 In principle every cable should do, but I use Ethernet cables for that because they are shielded and conveniently offer
-twisted wire pairs. According to the S0 protocol, on pulse is sent by the energymeter every time a certain unit of energy is consumed.
+twisted wire pairs. According to the S0 protocol, one pulse is sent by the energymeter every time a certain unit of energy is consumed.
 This value depends on the meter, but in my case it's one pulse per Wh. Of each energy meter, the S0- port is connected to the GND of the raspberry pi. The S0+ port to any of
 the GPIO ports. GPIO ports must be set to Pull-up. We can then detect a falling edge signal.
 
