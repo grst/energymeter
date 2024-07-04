@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from functools import partial
 from importlib.resources import files
 from queue import Queue
@@ -20,7 +20,7 @@ from .modbus import Modbus
 
 def _pulse_callback(_, *, queue: Queue, meter: GPIOMeter):
     """Callback function when an event is detected on a GPIO port"""
-    print(f"{meter.name}\t{meter.id}\t{datetime.now(datetime.UTF).isoformat()}")
+    print(f"{meter.name}\t{meter.id}\t{datetime.now(UTC).isoformat()}\t{1}")
     event = meter.get_event()
     queue.put(event)
 
@@ -43,7 +43,8 @@ def watch_modbus(
         f"Setting up meter '{meter.name}' with ID {meter.id} for register {meter.modbus_register_address} on {meter.ip_address}\n"
     )
     while True:
-        value = modbus_client.read_modbus(meter.meter.get_register(), unit=meter.unit)
+        value = modbus_client.read_modbus(meter.get_register(), unit=meter.unit)
+        print(f"{meter.name}\t{meter.id}\t{datetime.now(UTC).isoformat()}\t{value}")
         event = meter.get_event(value)
         queue.put(event)
         sleep(interval)
@@ -70,9 +71,11 @@ def main():
 
     db_session = get_session(CONFIG["db_con"])
 
-    modbus_meters: list[ModbusMeter] = _load_meters(CONFIG["meters"]["Modbus"], ModbusMeter)
-    gpio_meters: list[GPIOMeter] = _load_meters(CONFIG["meters"]["GPIO"], GPIOMeter)
-    assert len(modbus_meters) + len(gpio_meters) == {m.id for m in modbus_meters + gpio_meters}, "Meter IDs not unique"
+    modbus_meters: list[ModbusMeter] = _load_meters(CONFIG["meters"]["Modbus"], ModbusMeter, with_db_table=True)
+    gpio_meters: list[GPIOMeter] = _load_meters(CONFIG["meters"]["GPIO"], GPIOMeter, with_db_table=True)
+    assert len(modbus_meters) + len(gpio_meters) == len(
+        {m.id for m in modbus_meters + gpio_meters}
+    ), "Meter IDs not unique"
     modbus_connections = _connect_to_modbus(modbus_meters)
 
     db_thread = Thread(target=write_events_to_database, kwargs={"queue": event_queue, "db_session": db_session})
@@ -91,7 +94,7 @@ def main():
                 "modbus_client": modbus_connections[meter.ip_address],
                 "meter": meter,
                 "queue": event_queue,
-                "inverval": CONFIG["inverval"],
+                "interval": CONFIG["interval"],
             },
         )
         tmp_thread.start()
