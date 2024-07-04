@@ -12,43 +12,44 @@ import yaml
 from RPi import GPIO
 from sqlalchemy.exc import SQLAlchemyError
 
-from ._util import _connect_to_modbus
-from .db import CumulativePower, Power, Pulse, get_session
-from .modbus import Modbus, Register
+from ._util import _connect_to_modbus, _load_meters
+from .db import get_session
+from .meters import GPIOMeter, ModbusMeter
+from .modbus import Modbus
 
 
-def _pulse_callback(_, *, queue: Queue, meter_id: str):
+def _pulse_callback(_, *, queue: Queue, meter: GPIOMeter):
     """Callback function when an event is detected on a GPIO port"""
-    print(f"{meter_id}\t{datetime.now(datetime.UTF).isoformat()}")
-    new_pulse = Pulse(meter_id=meter_id, time=datetime.now(datetime.UTF))
-    queue.put(new_pulse)
+    print(f"{meter.name}\t{meter.id}\t{datetime.now(datetime.UTF).isoformat()}")
+    event = meter.get_event()
+    queue.put(event)
+
+
+def watch_gpio(meter: GPIOMeter, queue: Queue):
+    """Monitor a GPIO port via events"""
+    sys.stderr.write(f"Setting up meter '{meter.name}' with ID {meter.id} on GPIO {meter.gpio_port}\n")
+    GPIO.setup(meter.gpio_port, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(meter.gpio_port, GPIO.FALLING, callback=partial(_pulse_callback, meter=meter, queue=queue))
 
 
 def watch_modbus(
+    meter: ModbusMeter,
     modbus_client: Modbus,
-    meter_id: str,
-    register: Register,
-    result_type: type[Power] | type[CumulativePower],
-    ip: str,
     queue: Queue,
     interval: int,
 ):
     """Monitor a modbus register at a fixed interval"""
-    sys.stderr.write(f"Setting up meter '{meter_id}' for register {register} on {ip}\n")
+    sys.stderr.write(
+        f"Setting up meter '{meter.name}' with ID {meter.id} for register {meter.modbus_register_address} on {meter.ip_address}\n"
+    )
     while True:
-        value = modbus_client.read_modbus(register)
-        queue.put(result_type(meter_id=meter_id, time=datetime.now(datetime.UTC), value=value))
+        value = modbus_client.read_modbus(meter.meter.get_register(), unit=meter.unit)
+        event = meter.get_event(value)
+        queue.put(event)
         sleep(interval)
 
 
-def watch_gpio(meter_id: str, port: int, queue: Queue):
-    """Monitor a GPIO port via events"""
-    sys.stderr.write(f"Setting up meter '{meter_id}' on GPIO {port}\n")
-    GPIO.setup(port, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(port, GPIO.FALLING, callback=partial(_pulse_callback, meter_id=meter_id, queue=queue))
-
-
-def events_to_database(queue: Queue, db_session):
+def write_events_to_database(queue: Queue, db_session):
     """Thread that write elements from a Queue to the database"""
     while True:
         new_pulse = queue.get()
@@ -69,31 +70,32 @@ def main():
 
     db_session = get_session(CONFIG["db_con"])
 
-    modbus_connections = _connect_to_modbus(CONFIG["meters"])
+    modbus_meters: list[ModbusMeter] = _load_meters(CONFIG["meters"]["Modbus"], ModbusMeter)
+    gpio_meters: list[GPIOMeter] = _load_meters(CONFIG["meters"]["GPIO"], GPIOMeter)
+    assert len(modbus_meters) + len(gpio_meters) == {m.id for m in modbus_meters + gpio_meters}, "Meter IDs not unique"
+    modbus_connections = _connect_to_modbus(modbus_meters)
 
-    db_thread = Thread(target=events_to_database, kwargs={"queue": event_queue, "db_session": db_session})
+    db_thread = Thread(target=write_events_to_database, kwargs={"queue": event_queue, "db_session": db_session})
     db_thread.start()
 
+    # Start monitoring GPIO ports
+    for meter in gpio_meters:
+        watch_gpio(meter, event_queue)
+
+    # Start monitoring modbus connections
     threads = []
-    for meter_id, params in CONFIG["meters"].items():
-        if params["type"] == "Pulse":
-            watch_gpio(meter_id, params["GPIO"], event_queue)
-        elif params["type"] in ["Power", "CumulativePower"]:
-            tmp_thread = Thread(
-                target=watch_modbus,
-                kwargs={
-                    "modbus_client": modbus_connections[params["ip"]],
-                    "meter_id": meter_id,
-                    "register": params["register"],
-                    "type_": params["type"],
-                    "queue": event_queue,
-                    "inverval": CONFIG["inverval"],
-                },
-            )
-            tmp_thread.start()
-            threads.append(tmp_thread)
-        else:
-            raise ValueError(f"Invalid type for {meter_id}")
+    for meter in modbus_meters:
+        tmp_thread = Thread(
+            target=watch_modbus,
+            kwargs={
+                "modbus_client": modbus_connections[meter.ip_address],
+                "meter": meter,
+                "queue": event_queue,
+                "inverval": CONFIG["inverval"],
+            },
+        )
+        tmp_thread.start()
+        threads.append(tmp_thread)
 
     # will wait forever, since this thread never finishes
     db_thread.join()

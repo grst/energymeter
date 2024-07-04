@@ -1,13 +1,15 @@
 """Definitions of different types of meters"""
 
+from abc import ABC, abstractmethod
 from dataclasses import KW_ONLY, dataclass
+from datetime import UTC, datetime
 from typing import Literal
 
-from . import modbus
+from . import db, modbus
 
 
 @dataclass
-class Meter:
+class Meter(ABC):
     id: int
     """Unique numeric id used to store results in the database"""
     _: KW_ONLY
@@ -16,6 +18,11 @@ class Meter:
     db_table: Literal["Pulse", "Power", "CumulativePower"] = None
     """Sqlalchemy type that represents a table into which the measurements shall be saved. Leave None if you don't want to record this meter"""
 
+    @abstractmethod
+    def get_event(self, value=None) -> db.Pulse | db.Power | db.CumulativePower:
+        """Get a measurement object to be written in the database for this meter"""
+        ...
+
 
 @dataclass
 class GPIOMeter(Meter):
@@ -23,6 +30,9 @@ class GPIOMeter(Meter):
     """Rasperry pi GPIO port"""
     imp_per_kwh: int
     """Number of pulses sent via S0 per kWh"""
+
+    def get_event(self, value=None) -> db.Pulse | db.Power | db.CumulativePower:
+        return getattr(db, self.db_table)(meter_id=self.id, time=datetime.now(UTC))
 
 
 @dataclass
@@ -33,6 +43,11 @@ class ModbusMeter(Meter):
     unit = 3
     """Modbus Unit. For SMA devices the default is 3"""
 
-    def get_register_type(self) -> type:
-        """Get the register type as type object"""
-        return getattr(modbus, self.modbus_register_type)
+    def get_register(self) -> modbus.Register:
+        """Get the modbus register object for this meter"""
+        return getattr(modbus, self.modbus_register_type)(
+            self.modbus_register_address, name=self.name, description=self.description
+        )
+
+    def get_event(self, value=None) -> db.Pulse | db.Power | db.CumulativePower:
+        return getattr(db, self.db_table)(meter_id=self.id, time=datetime.now(UTC), value=value)

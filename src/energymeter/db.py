@@ -1,6 +1,6 @@
-import datetime
+from datetime import UTC, datetime
 
-from sqlalchemy import Column, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, DateTime, Integer, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 Base = declarative_base()
@@ -11,16 +11,16 @@ class Pulse(Base):
 
     __tablename__ = "pulses"
 
-    meter_id = Column(String(20), nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(datetime.UTC), index=True, primary_key=True)
+    meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
 
 
 class Power(Base):
     """Store power measurements (current power in Watts)"""
 
     __tablename__ = "power"
-    meter_id = Column(String(20), nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(datetime.UTC), index=True, primary_key=True)
+    meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
     value = Column(Integer, nullable=False)
 
 
@@ -28,8 +28,8 @@ class CumulativePower(Base):
     """Store cumulative power measurements (counter readouts in Watt hours)"""
 
     __tablename__ = "cumulative_power"
-    meter_id = Column(String(20), nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(datetime.UTC), index=True, primary_key=True)
+    meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
     value = Column(Integer, nullable=False)
 
 
