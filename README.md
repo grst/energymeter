@@ -1,4 +1,17 @@
-# Energymeter
+# Monitoring energymeters and SMA devices using a Rasperry Pi Zero
+
+I live in a house with four flats, each of which is owned by a different member of my family.
+In 2024 we jointly invested in a 23kWp photovoltaics (PV) system with 22kWh battery storage. To optimally use the energy
+across the entire house, we now only have one contract (and one electricity meter) with the grid operator. Behind
+the main meter, the consumption of each flat is measured using an Eltako electricity meter (as shown below) which we
+use to split the electricity cost.
+
+With a PV system (and maybe in the future, dynamic tariffs), the cost per kWh is not fixed. It is basically
+free when there's sun and expensive otherwise. Thus ideally, we could not only record _how much_ energy is consumed,
+but also _when_. Like that we can learn more about our energy consumption, optimize it towards consuming more
+self-generated energy, and split the cost more accurately.
+
+| ![eltako meter](img/eltako_meter.jpg) | ![rasperry_pi](img/rasperry_pi.jpg) |
 
 A simple service to monitor multiple energymeters with a Rasperry Pi via the S0 protocol and store all pulses in a sqlite database.
 It can also read out modbus registers of some SMA devices (tested with Sunny Tripower inverter and Sunny Island battery).
