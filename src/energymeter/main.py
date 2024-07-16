@@ -9,8 +9,7 @@ from threading import Thread
 from time import sleep
 
 import yaml
-
-# from RPi import GPIO
+from RPi import GPIO
 from sqlalchemy.exc import SQLAlchemyError
 
 from ._util import _connect_to_modbus, _load_meters
@@ -63,7 +62,7 @@ def write_events_to_database(queue: Queue, db_session):
 
 
 def main():
-    # GPIO.setmode(GPIO.BCM)
+    GPIO.setmode(GPIO.BCM)
     # For communication between monitoring and writing threads
     event_queue = Queue()
 
@@ -83,8 +82,8 @@ def main():
     db_thread.start()
 
     # # Start monitoring GPIO ports
-    # for meter in gpio_meters:
-    #     watch_gpio(meter, event_queue)
+    for meter in gpio_meters:
+        watch_gpio(meter, event_queue)
 
     # Start monitoring modbus connections
     threads = []
