@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Integer, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
@@ -12,7 +12,7 @@ class Pulse(Base):
     __tablename__ = "pulses"
 
     meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.utcnow(), index=True, primary_key=True)
 
 
 class Power(Base):
@@ -20,7 +20,7 @@ class Power(Base):
 
     __tablename__ = "power"
     meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.utcnow(), index=True, primary_key=True)
     value = Column(Integer, nullable=False)
 
 
@@ -29,7 +29,7 @@ class CumulativePower(Base):
 
     __tablename__ = "cumulative_power"
     meter_id = Column(Integer, nullable=False, index=True, primary_key=True)
-    time = Column(DateTime, nullable=False, default=datetime.now(UTC), index=True, primary_key=True)
+    time = Column(DateTime, nullable=False, default=datetime.utcnow(), index=True, primary_key=True)
     value = Column(Integer, nullable=False)
 
 

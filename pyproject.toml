@@ -4,10 +4,10 @@ requires = ["hatchling"]
 
 [project]
 name = "energymeter"
-version = "0.0.1"
+version = "0.1.0"
 description = "Monitoring energy meters (S0 or modbus) on a rasperry pi"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [
     {name = "Gregor Sturm"},

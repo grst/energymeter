@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 from functools import partial
 from importlib.resources import files
 from queue import Queue
@@ -9,7 +9,8 @@ from threading import Thread
 from time import sleep
 
 import yaml
-from RPi import GPIO
+
+# from RPi import GPIO
 from sqlalchemy.exc import SQLAlchemyError
 
 from ._util import _connect_to_modbus, _load_meters
@@ -20,7 +21,7 @@ from .modbus import Modbus
 
 def _pulse_callback(_, *, queue: Queue, meter: GPIOMeter):
     """Callback function when an event is detected on a GPIO port"""
-    print(f"{meter.name}\t{meter.id}\t{datetime.now(UTC).isoformat()}\t{1}")
+    print(f"{meter.name}\t{meter.id}\t{datetime.utcnow().isoformat()}\t{1}")
     event = meter.get_event()
     queue.put(event)
 
@@ -44,7 +45,7 @@ def watch_modbus(
     )
     while True:
         value = modbus_client.read_modbus(meter.get_register(), unit=meter.unit)
-        print(f"{meter.name}\t{meter.id}\t{datetime.now(UTC).isoformat()}\t{value}")
+        print(f"{meter.name}\t{meter.id}\t{datetime.utcnow().isoformat()}\t{value}")
         event = meter.get_event(value)
         queue.put(event)
         sleep(interval)
@@ -62,7 +63,7 @@ def write_events_to_database(queue: Queue, db_session):
 
 
 def main():
-    GPIO.setmode(GPIO.BCM)
+    # GPIO.setmode(GPIO.BCM)
     # For communication between monitoring and writing threads
     event_queue = Queue()
 
@@ -81,9 +82,9 @@ def main():
     db_thread = Thread(target=write_events_to_database, kwargs={"queue": event_queue, "db_session": db_session})
     db_thread.start()
 
-    # Start monitoring GPIO ports
-    for meter in gpio_meters:
-        watch_gpio(meter, event_queue)
+    # # Start monitoring GPIO ports
+    # for meter in gpio_meters:
+    #     watch_gpio(meter, event_queue)
 
     # Start monitoring modbus connections
     threads = []
