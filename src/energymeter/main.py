@@ -43,10 +43,13 @@ def watch_modbus(
         f"Setting up meter '{meter.name}' with ID {meter.id} for register {meter.modbus_register_address} on {meter.ip_address}\n"
     )
     while True:
-        value = modbus_client.read_modbus(meter.get_register(), unit=meter.unit)
-        print(f"{meter.name}\t{meter.id}\t{datetime.utcnow().isoformat()}\t{value}")
-        event = meter.get_event(value)
-        queue.put(event)
+        try:
+            value = modbus_client.read_modbus(meter.get_register(), unit=meter.unit)
+            print(f"{meter.name}\t{meter.id}\t{datetime.utcnow().isoformat()}\t{value}")
+            event = meter.get_event(value)
+            queue.put(event)
+        except (AttributeError, KeyError, OSError):
+            pass
         sleep(interval)
 
 
