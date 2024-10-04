@@ -58,8 +58,9 @@ def write_events_to_database(queue: Queue, db_session):
     while True:
         new_pulse = queue.get()
         try:
-            db_session.add(new_pulse)
-            db_session.commit()
+            with db_session() as session:
+                session.add(new_pulse)
+                session.commit()
         except SQLAlchemyError as e:
             sys.stderr.write(f"Exception when writing to database: {e}")
 

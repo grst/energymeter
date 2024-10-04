@@ -36,5 +36,4 @@ class CumulativePower(Base):
 def get_session(con):
     engine = create_engine(con)
     Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    return Session()
+    return sessionmaker(bind=engine)
