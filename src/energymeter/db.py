@@ -34,6 +34,6 @@ class CumulativePower(Base):
 
 
 def get_session(con):
-    engine = create_engine(con)
+    engine = create_engine(con, connect_args={'timeout': 15})
     Base.metadata.create_all(engine)
     return sessionmaker(bind=engine)
