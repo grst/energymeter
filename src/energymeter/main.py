@@ -16,6 +16,7 @@ from ._util import _connect_to_modbus, _load_meters
 from .db import get_session
 from .meters import GPIOMeter, ModbusMeter
 from .modbus import Modbus
+from pymodbus.exceptions import ModbusException
 
 
 def _pulse_callback(_, *, queue: Queue, meter: GPIOMeter):
@@ -48,7 +49,7 @@ def watch_modbus(
             print(f"{meter.name}\t{meter.id}\t{datetime.utcnow().isoformat()}\t{value}")
             event = meter.get_event(value)
             queue.put(event)
-        except (AttributeError, KeyError, OSError):
+        except (AttributeError, KeyError, OSError, ModbusException):
             pass
         sleep(interval)
 

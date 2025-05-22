@@ -1,3 +1,4 @@
 #!/bin/bash
 
-cd /home/admin/energymeter && ./monitor.py | multilog ./data/log n400
+source /home/admin/energymeter/venv/bin/activate 
+energymeter |  multilog /home/admin/energymeter/data/log n400

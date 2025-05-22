@@ -85,6 +85,6 @@ meters:
       modbus_register_type: U32
       ip_address: 192.168.193.156
 
-db_con: "sqlite:///./data/pulse.sqlite"
+db_con: "sqlite:///home/admin/energymeter/data/pulse.sqlite"
 # interval for polling modbus interfaces in seconds
 interval: 5
