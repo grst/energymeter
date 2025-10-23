@@ -62,7 +62,7 @@ def write_events_to_database(queue: Queue, db_session):
             with db_session() as session:
                 session.add(new_pulse)
                 session.commit()
-        except SQLAlchemyError as e:
+        except (SQLAlchemyError, OverflowError) as e:
             sys.stderr.write(f"Exception when writing to database: {e}")
 
 
